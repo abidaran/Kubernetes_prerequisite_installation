@@ -1,0 +1,50 @@
+- name: Ping my hosts
+  ansible.builtin.ping:
+
+- name: Print message
+  ansible.builtin.debug:
+    msg: Hello world
+   
+- name: --- Install apache ----
+  apt: 
+   name: apache2
+   state: present
+  tags: apache   
+- name: --- Install nginx ----
+  apt: 
+    name: nginx
+    state: present
+  tags: nginx
+
+- name: --- Tracking the loop index ---
+  debug:
+    msg: "The {{item}} index is {{my_index}}"
+  loop:
+    - first
+    - second
+    - third
+  loop_control:
+    index_var: my_index
+  tags: loop
+
+- name: --- Retry a task until a certain condition is met ---
+  shell: cat /home/test.txt
+  register: catty
+  until: catty.stdout.find("Ansible") != -1
+  retries: 3
+  delay: 10
+  tags: loop2
+
+- name: --- configure nginx ----
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify:
+    - restart nginx
+  tags: config_nginx
+
+- name: --- restart nginx service ---
+  service:
+    name: nginx
+    state: restarted
+  tags: restart_nginx

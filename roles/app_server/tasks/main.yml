@@ -1,0 +1,67 @@
+- name: ---- install Java ---
+  apt:
+    name: openjdk-11-jdk
+    state: present
+  tags: install_java
+
+- name: --- Download Apache Tomcat ---
+  get_url:
+    url: '{{tomcat_url}}'
+    dest: /opt
+    validate_certs: false
+  tags: download_tomcat 
+
+- name: --- Extract and install apache tomcat ---
+  unarchive:
+    src: "{{tomcat_path}}.tar.gz"
+    dest: /opt
+    remote_src: yes
+  tags: install_tomcat
+
+- name: --- create tomcat link ---
+  file:
+    src: "{{tomcat_path}}"
+    dest: /opt/tomcat
+    state: link
+  tags: tomcat_link
+
+- name: --- create tomcat service ---
+  template:
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/tomcat.service
+  tags: tomcat_unit
+
+- name: --- reload daemon ---
+  systemd: 
+   daemon_reload: yes
+  tags: tomcat_unit
+
+- name: --- configure apache tomcat ---
+  template: 
+   src: server.xml.j2
+   dest: /opt/tomcat/conf/server.xml
+  tags: config_ tomcat
+
+- name: --- deploy war file to tomcat ---
+  get_url:
+    url: "https://github.com/efsavage/hello-world-war/raw/master/dist/hello-world.war"
+    dest: /opt/tomcat/webapps/hello-world.war
+    validate_certs: false
+  tags: deploy_app 
+
+- name: --- configure iptables ---
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{tomcat_port}}"
+    jump: ACCEPT
+    action: insert
+    state: present
+  tags: config_iptable
+
+- name: --- enable ans start appache tomcat --
+  service:
+    name: tomcat
+    enabled: yes
+    state: restarted
+  tags: start_tomcat

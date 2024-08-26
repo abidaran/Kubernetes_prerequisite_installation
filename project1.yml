@@ -1,0 +1,4 @@
+- hosts: myservers
+  roles:
+    - project1
+- import_playbook: project2.yml

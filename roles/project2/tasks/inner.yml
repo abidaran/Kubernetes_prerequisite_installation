@@ -1,0 +1,7 @@
+- name: --- Print outer and inner items ---
+  debug:
+    msg: "outer item = {{outer_item}} and inner item = {{item}}"
+  loop:
+    - a
+    - b
+    - c

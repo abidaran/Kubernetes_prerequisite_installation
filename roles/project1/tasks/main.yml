@@ -1,0 +1,11 @@
+- name: ---- project1 ----
+  debug:
+    msg: "Hello from project 1"
+  tags: test1
+
+- import_tasks: task2.yml
+
+- name: ---- main.yml ----
+  debug:
+    msg: "Hello from main.yml"
+  tags: test 1 

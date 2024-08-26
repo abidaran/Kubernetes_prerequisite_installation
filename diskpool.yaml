@@ -1,0 +1,25 @@
+apiVersion: openebs.io/v1beta2
+kind: DiskPool
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"openebs.io/v1beta2","kind":"DiskPool","metadata":{"annotations":{},"name":"pool-on-node-1","namespace":"openebs"},"spec":{"disks":["/dev/sdb"],"node":"k8s-worker1"}}
+  creationTimestamp: "2024-08-23T19:07:55Z"
+  deletionGracePeriodSeconds: 0
+  deletionTimestamp: "2024-08-24T10:05:36Z"
+  finalizers:
+  - openebs.io/diskpool-protection
+  generation: 2
+  name: pool-on-node-1
+  namespace: dev
+  resourceVersion: "2577357"
+  uid: 80cd3865-8e8d-42f3-a824-71dd7b5e29e9
+spec:
+  disks:
+  - /dev/sdb
+  node: k8s-worker1
+status:
+  available: 0
+  capacity: 0
+  cr_state: Creating
+  used: 0

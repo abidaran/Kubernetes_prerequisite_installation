@@ -1,0 +1,125 @@
+- name: ---- set http proxy environment ----
+  template:
+    src: environment.j2
+    dest: /etc/environment
+  tags: http_proxy
+
+- name: ---- set http proxy apt ----
+  template: 
+   src: proxy.conf.j2
+   dest: /etc/apt/apt.conf.d/proxy.conf
+  tags: http_proxy
+
+- name: --- run apt update ---
+  command: apt update -y
+  tags: apt_update
+
+- name: --- Create LVM physical volume ----
+  command: pvcreate -y /dev/sda5
+  tags: extend_lvm
+
+- name: --- Create LVM volume group ----
+  command: vgextend ubuntu-vg /dev/sda5
+  tags: extend_lvm
+
+- name: ---- Lv extend ---
+  command: lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
+  tags: extend_lvm
+
+- name: --- resize2fs ---
+  command: resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+  tags: extend_lvm
+
+- name: --- set time zone ---
+  community.general.timezone:
+    name: Asia/Tehran
+  tags: set_timezone
+
+- name: --- disable swap ---
+  template:
+   src: fstab.j2
+   dest: /etc/fstab
+  tags: disable_swap
+
+- name: --- swap off ---
+  command: swapoff -a
+  tags: disable_swap
+
+- name: --- copy containerd files ---
+  copy:
+    src: containerd-1.7.19-linux-amd64.tar.gz
+    dest: /tmp/containerd-1.7.19-linux-amd64.tar.gz
+  tags: install_containerd
+
+- name: --- extract containerd ---
+  ansible.builtin.unarchive:
+   src: /tmp/containerd-1.7.19-linux-amd64.tar.gz
+   dest: /usr/local
+  tags: install_containerd
+
+- name: ---- install containerd service --- 
+  template:
+   src: containerd.service.j2
+   dest: /usr/lib/systemd/system/containerd.service
+  tags: install_containerd
+
+- name: --- reload daemon ---
+  command: systemctl daemon-reload
+  tags: install_containerd
+
+- name: --- start containerd ---
+  command: systemctl start containerd.service
+  tags: install_containerd
+
+- name: --- enable containerd ---
+  command: systemctl enable containerd.service
+  tags: install_containerd
+
+- name: --- copy runc ----
+  copy:
+    src: runc.amd64
+    dest: /tmp
+  tags: install_runc
+
+- name: ---- install runc ----
+  command: install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
+  tags: install_runc
+
+- name: --- create contianerd directory ----
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    mode: '0755'
+  tags: containerd_config
+- name: --- containerd config ----
+  template:
+   src: config.toml.j2
+   dest: /etc/containerd/config.toml
+  tags: containerd_config
+
+- name: --- restart containerd ----
+  command: systemctl restart containerd 
+  tags: containerd_config
+
+- name: --- copy cni files ---
+  copy:
+    src: cni-plugins-linux-amd64-v1.5.1.tgz
+    dest: /tmp/cni-plugins-linux-amd64-v1.5.1.tgz
+  tags: install_cni
+
+- name: --- create cni directory ----
+  ansible.builtin.file:
+    path: /opt/cni/bin
+    state: directory
+    mode: '0755'
+  tags: install_cni
+
+- name: --- extract cni ---
+  ansible.builtin.unarchive:
+   src: /tmp/cni-plugins-linux-amd64-v1.5.1.tgz
+   dest: /opt/cni/bin
+  tags: install_cni
+
+- name: --- restart kubelet ---
+  command: service kubelet restart
+  tags: kubelet_restart

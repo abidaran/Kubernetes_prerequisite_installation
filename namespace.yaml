@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{},"name":"openebs"}}
+  creationTimestamp: "2024-08-23T18:06:22Z"
+  deletionTimestamp: "2024-08-24T10:08:23Z"
+  labels:
+    kubernetes.io/metadata.name: openebs
+    name: openebs
+  name: openebs
+  resourceVersion: "2617245"
+  uid: e76b9203-4aa5-45b5-99b1-3b40812d5693
+spec:
+  finalizers:
+status:
+  conditions:
+  - lastTransitionTime: "2024-08-24T10:07:18Z"
+    message: All resources successfully discovered
+    reason: ResourcesDiscovered
+    status: "False"
+    type: NamespaceDeletionDiscoveryFailure
+  - lastTransitionTime: "2024-08-24T10:07:18Z"
+    message: All legacy kube types successfully parsed
+    reason: ParsedGroupVersions
+    status: "False"
+    type: NamespaceDeletionGroupVersionParsingFailure
+  - lastTransitionTime: "2024-08-24T10:07:18Z"
+    message: All content successfully deleted, may be waiting on finalization
+    reason: ContentDeleted
+    status: "False"
+    type: NamespaceDeletionContentFailure
+  - lastTransitionTime: "2024-08-24T10:07:18Z"
+    message: 'Some resources are remaining: diskpools.openebs.io has 1 resource instances'
+    reason: SomeResourcesRemain
+    status: "True"
+    type: NamespaceContentRemaining
+  - lastTransitionTime: "2024-08-24T10:07:18Z"
+    message: 'Some content in the namespace has finalizers remaining: openebs.io/diskpool-protection
+      in 1 resource instances'
+    reason: SomeFinalizersRemain
+    status: "True"
+    type: NamespaceFinalizersRemaining
+  phase: Terminating
